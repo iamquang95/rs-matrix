@@ -6,3 +6,4 @@ edition = "2018"
 keywords = ["matrix", "dfs", "bfs", "termui"]
 
 [dependencies]
+clap = "2.33.3"

@@ -1,0 +1,9 @@
+[package]
+name = "rs-matrix"
+version = "0.1.0"
+authors = ["Quang Le <iamquang95@gmail.com>"]
+edition = "2018"
+keywords = ["matrix", "dfs", "bfs", "termui"]
+
+[dependencies]
+clap = "2.33.3"

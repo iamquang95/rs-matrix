@@ -2,9 +2,14 @@ use clap::{App, Arg};
 use std::error::Error;
 use std::str::FromStr;
 
+mod matrix;
+
 fn main() {
     let config = extract_config().expect("Fail to parse params");
-    println!("{:?}", config)
+    println!("{:?}", config);
+
+    let m = matrix::Matrix::new(config.n_rows, config.n_cols);
+    println!("{}", m)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -3,13 +3,18 @@ use std::error::Error;
 use std::str::FromStr;
 
 mod matrix;
+mod solver;
 
 fn main() {
     let config = extract_config().expect("Fail to parse params");
     println!("{:?}", config);
 
     let m = matrix::Matrix::new(config.n_rows, config.n_cols);
-    println!("{}", m)
+    println!("{}", m);
+    if config.algo == SearchAlgo::BFS {
+        let mut bfs_solver = solver::BFSSolver::new(&m);
+        bfs_solver.solve();
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,7 +28,7 @@ impl std::fmt::Display for ParseAlgoError {
 
 impl Error for ParseAlgoError {}
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 enum SearchAlgo {
     DFS,
     BFS,

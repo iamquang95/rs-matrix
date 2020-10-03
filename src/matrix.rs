@@ -11,7 +11,12 @@ pub enum Direction {
 
 impl Direction {
     pub fn get_dirs() -> Vec<Direction> {
-        vec!(Direction::Up, Direction::Down, Direction::Left, Direction::Right)
+        vec![
+            Direction::Up,
+            Direction::Down,
+            Direction::Left,
+            Direction::Right,
+        ]
     }
     pub fn reverse(&self) -> Direction {
         match self {
@@ -74,9 +79,12 @@ impl Matrix {
             finish: free_cells[rng.gen_range(0, free_cells.len())],
         }
     }
-    
+
     pub fn inside(&self, cell: Cell) -> bool {
-        cell.0 >= 0 && (cell.0 as usize) < self.n_rows && cell.1 >= 0 && (cell.1 as usize) < self.n_cols
+        cell.0 >= 0
+            && (cell.0 as usize) < self.n_rows
+            && cell.1 >= 0
+            && (cell.1 as usize) < self.n_cols
     }
 
     pub fn is_free_cell(&self, cell: Cell) -> bool {
@@ -98,7 +106,7 @@ impl Matrix {
 impl fmt::Display for Matrix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s = String::with_capacity(self.n_cols * self.n_cols + self.n_rows);
-        (*self.matrix).into_iter().enumerate().for_each(|(r,row)| {
+        (*self.matrix).into_iter().enumerate().for_each(|(r, row)| {
             row.into_iter().enumerate().for_each(|(c, cell)| {
                 let c = if *cell {
                     let cur_cell = Cell(r as isize, c as isize);
@@ -107,9 +115,11 @@ impl fmt::Display for Matrix {
                     } else if cur_cell == self.finish {
                         'F'
                     } else {
-                    ' ' 
+                        ' '
                     }
-                } else { '*' };
+                } else {
+                    '*'
+                };
                 s.push(c);
             });
             s.push_str("\r\n");

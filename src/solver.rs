@@ -1,4 +1,4 @@
-use crate::matrix::{Matrix, Cell, Direction};
+use crate::matrix::{Cell, Direction, Matrix};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct BFSSolver<'s> {
@@ -8,10 +8,7 @@ pub struct BFSSolver<'s> {
 
 impl<'s> BFSSolver<'s> {
     pub fn new(matrix: &Matrix) -> BFSSolver {
-        BFSSolver {
-            matrix,
-            path: None,
-        }
+        BFSSolver { matrix, path: None }
     }
 
     pub fn solve(&mut self) {

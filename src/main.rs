@@ -5,15 +5,39 @@ use std::str::FromStr;
 mod matrix;
 mod solver;
 
+use crossterm::{cursor, ExecutableCommand, QueueableCommand};
+use std::io::Write;
+use std::{thread, time::Duration};
+
 fn main() {
+    let mut stdout = std::io::stdout();
+    stdout.execute(cursor::Hide).expect("failed to hide cursor");
+
     let config = extract_config().expect("Fail to parse params");
     println!("{:?}", config);
 
+    println!("{:?}", cursor::position());
+
     let m = matrix::Matrix::new(config.n_rows, config.n_cols);
     println!("{}", m);
+    println!("{}", m);
+
+    let traverse = |matrix: &matrix::Matrix, cell: &matrix::Cell| {
+        thread::sleep(Duration::from_millis(config.step_delay as u64));
+        stdout.queue(cursor::SavePosition).unwrap();
+        stdout
+            .queue(cursor::MoveToPreviousLine((matrix.n_rows + 1) as u16))
+            .unwrap();
+        stdout.queue(cursor::MoveRight(cell.1 as u16)).unwrap();
+        stdout.queue(cursor::MoveDown(cell.0 as u16)).unwrap();
+        stdout.write_fmt(format_args!("{}", ".")).unwrap();
+        stdout.queue(cursor::RestorePosition).unwrap();
+        stdout.flush().unwrap();
+    };
+
     if config.algo == SearchAlgo::BFS {
         let mut bfs_solver = solver::BFSSolver::new(&m);
-        bfs_solver.solve();
+        bfs_solver.solve(traverse);
     }
 }
 

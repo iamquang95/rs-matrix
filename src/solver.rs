@@ -11,7 +11,7 @@ impl<'s> BFSSolver<'s> {
         BFSSolver { matrix, path: None }
     }
 
-    pub fn solve(&mut self) {
+    pub fn solve<F>(&mut self, mut traverse: F) where F: FnMut(&Matrix, &Cell) {
         let mut trace: HashMap<Cell, Cell> = HashMap::new();
         let mut visited: HashSet<Cell> = HashSet::new();
         let mut que: VecDeque<Cell> = VecDeque::new();
@@ -19,12 +19,13 @@ impl<'s> BFSSolver<'s> {
         visited.insert(self.matrix.start);
         while que.len() > 0 {
             let cell = que.pop_front().expect("queue is empty");
+            traverse(self.matrix, &cell);
             if cell == self.matrix.finish {
                 break;
             }
             for dir in Direction::get_dirs().into_iter() {
                 let new_cell = cell.move_dir(dir);
-                if self.matrix.is_free_cell(cell) && !visited.contains(&new_cell) {
+                if self.matrix.is_free_cell(new_cell) && !visited.contains(&new_cell) {
                     visited.insert(new_cell);
                     que.push_back(new_cell);
                     trace.insert(new_cell, new_cell.move_dir(dir.reverse()));

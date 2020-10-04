@@ -5,7 +5,7 @@ use std::str::FromStr;
 mod matrix;
 mod solver;
 
-use crossterm::{cursor, ExecutableCommand, QueueableCommand};
+use crossterm::{cursor, style, ExecutableCommand, QueueableCommand};
 use std::io::Write;
 use std::{thread, time::Duration};
 
@@ -14,31 +14,98 @@ fn main() {
     stdout.execute(cursor::Hide).expect("failed to hide cursor");
 
     let config = extract_config().expect("Fail to parse params");
-    println!("{:?}", config);
-
-    println!("{:?}", cursor::position());
 
     let m = matrix::Matrix::new(config.n_rows, config.n_cols);
-    println!("{}", m);
-    println!("{}", m);
+    draw_matrix(&mut stdout, &m);
 
     let traverse = |matrix: &matrix::Matrix, cell: &matrix::Cell| {
-        thread::sleep(Duration::from_millis(config.step_delay as u64));
-        stdout.queue(cursor::SavePosition).unwrap();
-        stdout
-            .queue(cursor::MoveToPreviousLine((matrix.n_rows + 1) as u16))
-            .unwrap();
-        stdout.queue(cursor::MoveRight(cell.1 as u16)).unwrap();
-        stdout.queue(cursor::MoveDown(cell.0 as u16)).unwrap();
-        stdout.write_fmt(format_args!("{}", ".")).unwrap();
-        stdout.queue(cursor::RestorePosition).unwrap();
-        stdout.flush().unwrap();
+        if *cell != matrix.start && *cell != matrix.finish {
+            thread::sleep(Duration::from_millis(config.step_delay as u64));
+            draw_cell(&mut stdout, matrix, cell, style::Color::DarkYellow, '·')
+        }
     };
 
     if config.algo == SearchAlgo::BFS {
         let mut bfs_solver = solver::BFSSolver::new(&m);
-        bfs_solver.solve(traverse);
+        let path_opt = bfs_solver.solve(traverse);
+        if let Some(path) = path_opt {
+            highlight_path(&mut stdout, &m, &path, config);
+        }
     }
+}
+
+fn highlight_path(
+    stdout: &mut std::io::Stdout,
+    matrix: &matrix::Matrix,
+    path: &Vec<matrix::Cell>,
+    config: Config,
+) {
+    for cell in path.into_iter() {
+        thread::sleep(Duration::from_millis(config.step_delay as u64));
+        draw_cell(stdout, matrix, cell, style::Color::Green, 'x');
+    }
+}
+
+fn draw_matrix(stdout: &mut std::io::Stdout, matrix: &matrix::Matrix) {
+    for _ in 0..matrix.n_rows {
+        stdout.write_fmt(format_args!("\r\n")).unwrap();
+    }
+    stdout.flush().unwrap();
+    stdout
+        .queue(cursor::MoveToPreviousLine(matrix.n_rows as u16))
+        .unwrap();
+    (*matrix.matrix)
+        .into_iter()
+        .enumerate()
+        .for_each(|(r, row)| {
+            row.into_iter().enumerate().for_each(|(c, cell)| {
+                if *cell {
+                    let cur_cell = matrix::Cell(r as isize, c as isize);
+                    if cur_cell == matrix.start {
+                        stdout
+                            .queue(style::SetForegroundColor(style::Color::Green))
+                            .unwrap();
+                        stdout.write_fmt(format_args!("{}", 'S')).unwrap();
+                    } else if cur_cell == matrix.finish {
+                        stdout
+                            .queue(style::SetForegroundColor(style::Color::Green))
+                            .unwrap();
+                        stdout.write_fmt(format_args!("{}", 'F')).unwrap();
+                    } else {
+                        stdout
+                            .queue(style::SetForegroundColor(style::Color::Reset))
+                            .unwrap();
+                        stdout.write_fmt(format_args!("{}", ' ')).unwrap();
+                    }
+                } else {
+                    stdout
+                        .queue(style::SetForegroundColor(style::Color::DarkGrey))
+                        .unwrap();
+                    stdout.write_fmt(format_args!("{}", '█')).unwrap();
+                };
+            });
+            stdout.queue(cursor::MoveToNextLine(1)).unwrap();
+        });
+    stdout.flush().unwrap();
+}
+
+fn draw_cell(
+    stdout: &mut std::io::Stdout,
+    matrix: &matrix::Matrix,
+    cell: &matrix::Cell,
+    color: style::Color,
+    ch: char,
+) {
+    stdout.queue(cursor::SavePosition).unwrap();
+    stdout
+        .queue(cursor::MoveToPreviousLine(matrix.n_rows as u16))
+        .unwrap();
+    stdout.queue(cursor::MoveRight(cell.1 as u16)).unwrap();
+    stdout.queue(cursor::MoveDown(cell.0 as u16)).unwrap();
+    stdout.queue(style::SetForegroundColor(color)).unwrap();
+    stdout.write_fmt(format_args!("{}", ch)).unwrap();
+    stdout.queue(cursor::RestorePosition).unwrap();
+    stdout.flush().unwrap();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

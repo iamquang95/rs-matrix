@@ -3,15 +3,17 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct BFSSolver<'s> {
     matrix: &'s Matrix,
-    path: Option<Vec<Cell>>,
 }
 
 impl<'s> BFSSolver<'s> {
     pub fn new(matrix: &Matrix) -> BFSSolver {
-        BFSSolver { matrix, path: None }
+        BFSSolver { matrix }
     }
 
-    pub fn solve<F>(&mut self, mut traverse: F) where F: FnMut(&Matrix, &Cell) {
+    pub fn solve<F>(&mut self, mut traverse: F) -> Option<Vec<Cell>>
+    where
+        F: FnMut(&Matrix, &Cell),
+    {
         let mut trace: HashMap<Cell, Cell> = HashMap::new();
         let mut visited: HashSet<Cell> = HashSet::new();
         let mut que: VecDeque<Cell> = VecDeque::new();
@@ -40,10 +42,9 @@ impl<'s> BFSSolver<'s> {
                 cell_opt = trace.get(&cur_cell);
             }
             path.reverse();
-            self.path = Some(path);
-            println!("FOUND PATH {:?}", &self.path)
+            Some(path)
         } else {
-            println!("NOT FOUND PATH")
+            None
         }
     }
 }

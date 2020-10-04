@@ -1,5 +1,4 @@
 use rand::Rng;
-use std::fmt;
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -100,32 +99,5 @@ impl Matrix {
         } else {
             false
         }
-    }
-
-
-}
-
-impl fmt::Display for Matrix {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut s = String::with_capacity(self.n_cols * self.n_cols + self.n_rows);
-        (*self.matrix).into_iter().enumerate().for_each(|(r, row)| {
-            row.into_iter().enumerate().for_each(|(c, cell)| {
-                let c = if *cell {
-                    let cur_cell = Cell(r as isize, c as isize);
-                    if cur_cell == self.start {
-                        'S'
-                    } else if cur_cell == self.finish {
-                        'F'
-                    } else {
-                        ' '
-                    }
-                } else {
-                    '*'
-                };
-                s.push(c);
-            });
-            s.push_str("\r\n");
-        });
-        write!(f, "{}", s)
     }
 }

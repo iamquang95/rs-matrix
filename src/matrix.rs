@@ -29,7 +29,7 @@ impl Direction {
 }
 
 #[derive(Debug, Clone, Hash, Eq, Copy, PartialEq)]
-pub struct Cell(isize, isize);
+pub struct Cell(pub isize, pub isize);
 
 impl Cell {
     pub fn move_dir(&self, dir: Direction) -> Cell {
@@ -101,6 +101,8 @@ impl Matrix {
             false
         }
     }
+
+
 }
 
 impl fmt::Display for Matrix {
